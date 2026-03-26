@@ -1,53 +1,61 @@
-# Supported & Tested Devices
+# Supported Devices
 
-This driver targets **all Synaptics HID-over-I2C fingerprint sensors**.
-If your device works, please open a PR to add it to this list.
+This repository is currently focused on one concrete reverse-engineering target,
+not on broad support claims.
 
-## ✅ Confirmed Working
+## Primary Focus Device
 
-| Sensor ID | VID:PID | Laptop | Contributor | Status |
-|---|---|---|---|---|
-| SYNA30B8 | 06CB:CE1A | HP EliteBook x360 1040 G7 | @munene | Research / WIP |
+| USB ID | Reader | Laptop | Status |
+|---|---|---|---|
+| `06CB:00E9` | Synaptics FS7604 Touch Fingerprint Sensor with PurePrint | HP EliteBook x360 1040 G7 | Grounding / active research |
 
----
+Notes:
 
-## 🔍 Known Synaptics HID Sensors (Unconfirmed)
+- This is the main device the repo is organized around today.
+- `lsusb` can see it on the target laptop.
+- `fprintd` does not support it yet in the current environment.
 
-These share the same `06CB` Vendor ID and likely use a similar HID protocol.
-Community testing needed:
+## Candidate Related Devices
 
-| Sensor ID | VID:PID | Known Laptops |
+These are nearby Synaptics USB fingerprint readers worth revisiting once the
+`00E9` protocol shape is better understood.
+
+| USB ID | Known Laptop Families | Notes |
 |---|---|---|
-| SYNA3097 | 06CB:0097 | Lenovo ThinkPad X1 Carbon (various) |
-| SYNA305A | 06CB:005A | Dell Latitude 5000 series |
-| SYNA3255 | 06CB:* | HP ProBook 450 G6 |
-| SYNA7DB5 | 06CB:7DB5 | Lenovo IdeaPad |
-| SYNA30AF | 06CB:00AF | HP EliteBook 840 G6 |
+| `06CB:00B7` | HP EliteBook 840 G6 and related HP G6 systems | Candidate follow-on target |
+| `06CB:00F0` | HP EliteBook 840 G8 / 845 / 865 families | Likely related PurePrint family |
+| `06CB:00BD` | Lenovo ThinkPad X1 Extreme | Candidate follow-on target |
+| `06CB:00FC` | Lenovo ThinkPad X1 Carbon Gen 9/11 | Candidate follow-on target |
+| `06CB:009A` | Lenovo ThinkPad X1 Carbon Gen 6 | Older candidate reader family |
 
-> **Have one of these?** Run the probe tool and open an issue with your output!
+These are not currently marked supported. They are research targets only.
 
----
+## How To Identify Your Reader
 
-## 🧪 How to Test Your Device
+Use USB-based inspection first:
 
 ```bash
-# 1. Check if your sensor is Synaptics HID
-cat /sys/bus/i2c/devices/i2c-SYNA*/uevent
-
-# 2. Get VID:PID
-cat /sys/class/hidraw/hidraw*/device/uevent | grep -i syna
-
-# 3. Run the probe tool
-sudo cargo run -- probe
-
-# 4. Open an issue with your output at:
-# https://github.com/munene/linux-synaptics-hid-fingerprint/issues/new
+lsusb | grep -i synaptics
+usb-devices | sed -n '/Vendor=06cb/,+20p'
 ```
 
----
+If you find a Synaptics fingerprint reader, record:
 
-## ❌ Out of Scope
+- vendor and product ID
+- laptop model
+- whether `fprintd-enroll` can see it
+- whether the device exposes a driver already
 
-- Synaptics **USB** fingerprint readers (different protocol)
-- Non-Synaptics sensors (Goodix, ELAN, Validity — separate projects)
-- Windows Hello — Linux only
+## Current Scope
+
+In scope:
+
+- Synaptics USB fingerprint readers related to the `06CB:00E9` target
+- userspace protocol research
+- `libfprint` and `fprintd` integration
+
+Out of scope for now:
+
+- the older Synaptics touchpad-style IDs previously listed here
+- generic HID/I2C fingerprint claims without proof
+- non-Synaptics readers

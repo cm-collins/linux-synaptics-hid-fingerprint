@@ -1,119 +1,101 @@
-# Linux Kernel Submission Guide
+# Upstream Path
 
-> Roadmap for getting this driver merged into the official Linux kernel tree.
-> Target: `drivers/input/fingerprint/` or `drivers/hid/`
+This document keeps the long-term upstreaming strategy for the project.
 
----
+Despite the filename, the current plan is not a kernel driver first. The
+project is now centered on a vendor-specific USB fingerprint reader on the
+HP EliteBook x360 1040 G7:
 
-## 📋 Kernel Submission Checklist
+- Reader: Synaptics FS7604 Touch Fingerprint Sensor with PurePrint
+- USB ID: `06CB:00E9`
 
-### Phase 1 — Research (Current)
-- [ ] Capture full HID report descriptor ✅
-- [ ] Identify correct hidraw device node ✅
-- [ ] Decode HID report format
-- [ ] Capture fingerprint image data
-- [ ] Document the protocol
+## Current Upstream Strategy
 
-### Phase 2 — Userspace Prototype (Rust)
-- [ ] Working userspace driver reads fingerprint images
-- [ ] Integrate with libfprint as a plugin
-- [ ] Test enroll + verify flow
-- [ ] Document all findings
+The preferred path is:
 
-### Phase 3 — Kernel Driver (C or Rust)
-- [ ] Write kernel driver following `Documentation/process/coding-style.rst`
-- [ ] Add `Kconfig` entry under `drivers/hid/`
-- [ ] Add `Makefile` entry
-- [ ] Write device tree binding YAML
-- [ ] Add entry to `MAINTAINERS`
-- [ ] Test with `checkpatch.pl`
-- [ ] Test with `sparse` and `smatch`
+1. understand the device protocol in userspace
+2. build a local prototype
+3. integrate with `libfprint`
+4. validate with `fprintd`
+5. upstream the support in the most appropriate Linux userspace project
 
-### Phase 4 — Patch Submission
-- [ ] Subscribe to `linux-input@vger.kernel.org`
-- [ ] Send RFC (Request for Comments) patch series
-- [ ] Address maintainer feedback
-- [ ] Send v2, v3... until accepted
-- [ ] Merged into `input-next` tree → Linux mainline 🎉
+Kernel work is a later option, not the default assumption.
 
----
+## Why Kernel-First Is Not The Plan
 
-## 📧 Kernel Mailing Lists
+Facts observed on the target machine:
 
-| List | Purpose |
-|---|---|
-| `linux-input@vger.kernel.org` | Primary — input/HID drivers |
-| `linux-kernel@vger.kernel.org` | CC for final submission |
-| `linux-usb@vger.kernel.org` | CC if USB fallback added |
+- the reader enumerates over USB
+- the interface class is vendor-specific
+- there is no useful generic fingerprint kernel binding for the device today
+- `fprintd` reports `No devices available`
 
-### Relevant Maintainers to CC
-```
-Jiri Kosina <jikos@kernel.org>          # HID subsystem
-Benjamin Tissoires <bentiss@kernel.org> # HID subsystem
-Dmitry Torokhov <dmitry.t@samsung.com> # Input subsystem
-```
+That points toward `libfprint` and protocol work first.
 
----
+## Decision Gates
 
-## 🛠️ Kernel Patch Format
+### Gate 1: Transport Confidence
 
-Every commit destined for the kernel must follow this format:
+We should not write a driver until we can explain:
 
-```
-hid: synaptics: add driver for HID-over-I2C fingerprint sensors
+- interface layout
+- endpoint roles
+- basic device states
+- startup behavior
 
-Add support for Synaptics HID-over-I2C fingerprint sensors,
-starting with SYNA30B8 (VID:06CB PID:CE1A) as found in the
-HP EliteBook x360 1040 G7.
+### Gate 2: Device Model
 
-These sensors are currently bound to hid-multitouch which is
-incorrect. This driver correctly handles the fingerprint HID
-report descriptor and exposes the sensor to userspace via
-the standard /dev/hidraw interface for libfprint integration.
+We need to determine whether the reader behaves like:
 
-Tested-by: Munene <your-real@email.com>
-Signed-off-by: Munene <your-real@email.com>
-```
+- an image-based device
+- a template-oriented device
+- a match-on-chip device
 
----
+That choice affects the right `libfprint` integration model.
 
-## 🧹 Kernel Code Requirements
+### Gate 3: Upstream Target
 
-```bash
-# Check patch style before submitting
-./scripts/checkpatch.pl --strict your-patch.patch
+After the device model is clear, choose the upstream path:
 
-# Static analysis
-make C=1 drivers/hid/hid-synaptics-fingerprint.o
+- `libfprint` if the device can be supported in the Linux fingerprint stack
+- helper tooling only if the device is too constrained for full stack support
+- kernel work only if userspace support is blocked by missing kernel behavior
 
-# Sparse analysis
-make C=2 drivers/hid/hid-synaptics-fingerprint.o
-```
+## Long-Term Milestones
 
----
+### Milestone 1: Grounding
 
-## 📁 Target Kernel Directory Structure
+- confirm stable enumeration facts for `06CB:00E9`
+- align docs and development environment
 
-```
-linux/
-├── drivers/
-│   └── hid/
-│       ├── Kconfig                    ← Add: config HID_SYNAPTICS_FINGERPRINT
-│       ├── Makefile                   ← Add: obj-$(CONFIG_HID_SYNAPTICS_FINGERPRINT)
-│       └── hid-synaptics-fingerprint.c  ← The driver
-├── Documentation/
-│   └── devicetree/bindings/
-│       └── input/fingerprint/
-│           └── synaptics,syna30b8.yaml
-└── MAINTAINERS                        ← Add entry
-```
+### Milestone 2: Instrumentation
 
----
+- add descriptor and capture tooling
+- collect repeatable traces
 
-## 🔗 Resources
+### Milestone 3: Protocol Understanding
 
-- [Submitting Patches](https://www.kernel.org/doc/html/latest/process/submitting-patches.html)
-- [HID Driver Guide](https://www.kernel.org/doc/html/latest/hid/hid-transport.html)
-- [Kernel Coding Style](https://www.kernel.org/doc/html/latest/process/coding-style.html)
-- [libfprint Driver Guide](https://fprint.freedesktop.org/libfprint-dev/writing-drivers.html)
-- [Existing HID drivers](https://github.com/torvalds/linux/tree/master/drivers/hid)
+- document command framing and device state transitions
+
+### Milestone 4: Prototype
+
+- implement a small userspace transport and command harness
+
+### Milestone 5: Linux Integration
+
+- make enrollment and verification work through the Linux fingerprint stack
+
+## Eventual Kernel Work
+
+Kernel work is still possible later, but only if evidence shows it is required.
+If that day comes, the likely areas are:
+
+- permissions or enumeration helpers
+- transport support that cannot be handled cleanly from userspace
+- platform integration gaps discovered during `libfprint` work
+
+## References
+
+- [libfprint driver development documentation](https://fprint.freedesktop.org/libfprint-dev/driver-dev.html)
+- [libfprint advanced topics](https://fprint.freedesktop.org/libfprint-stable/advanced-topics.html)
+- [Linux USB subsystem documentation](https://www.kernel.org/doc/html/latest/driver-api/usb/index.html)

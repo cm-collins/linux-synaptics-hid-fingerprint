@@ -13,8 +13,8 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 REPO_NAME="linux-synaptics-hid-fingerprint"
-REPO_DESC="Linux kernel driver for Synaptics HID-over-I2C fingerprint sensors (SYNA30B8 and family) — targeting upstream Linux kernel drivers tree"
-REPO_TOPICS="linux,kernel,fingerprint,driver,rust,synaptics,hid,i2c,libfprint,open-source"
+REPO_DESC="Research workspace for Synaptics fingerprint support on Linux, starting with HP EliteBook x360 1040 G7 and USB reader 06CB:00E9"
+REPO_TOPICS="linux,fingerprint,driver,rust,synaptics,usb,libfprint,fprintd,reverse-engineering,open-source"
 
 echo -e "${CYAN}${BOLD}"
 echo "╔══════════════════════════════════════════════════════════╗"
@@ -47,14 +47,14 @@ echo -e "${GREEN}✅ Repository created and cloned${NC}\n"
 echo -e "${YELLOW}🏷️  Setting topics...${NC}"
 gh repo edit \
   --add-topic linux \
-  --add-topic kernel \
   --add-topic fingerprint \
   --add-topic driver \
   --add-topic rust \
   --add-topic synaptics \
-  --add-topic hid \
-  --add-topic i2c \
+  --add-topic usb \
   --add-topic libfprint \
+  --add-topic fprintd \
+  --add-topic reverse-engineering \
   --add-topic open-source
 echo -e "${GREEN}✅ Topics set${NC}\n"
 
@@ -83,13 +83,13 @@ echo -e "${GREEN}✅ Branches: main, develop, feature/syna30b8-initial-probe${NC
 
 # ── Create GitHub labels for kernel workflow ──────────────
 echo -e "${YELLOW}🏷️  Creating issue labels...${NC}"
-gh label create "kernel-submission"  --color "0075ca" --description "Related to upstream kernel patch submission"  2>/dev/null || true
 gh label create "sensor-research"    --color "e4e669" --description "Reverse engineering & protocol analysis"      2>/dev/null || true
 gh label create "rust"               --color "f74c00" --description "Rust implementation"                          2>/dev/null || true
-gh label create "hid-protocol"       --color "d93f0b" --description "HID over I2C protocol work"                  2>/dev/null || true
+gh label create "usb-protocol"       --color "d93f0b" --description "USB transport and protocol work"             2>/dev/null || true
 gh label create "needs-hardware"     --color "c5def5" --description "Requires physical Synaptics sensor to test"  2>/dev/null || true
 gh label create "hardware-support"   --color "bfdadc" --description "New device/sensor support"                   2>/dev/null || true
 gh label create "libfprint"          --color "1d76db" --description "libfprint integration"                       2>/dev/null || true
+gh label create "grounding"          --color "5319e7" --description "Baseline documentation and setup work"       2>/dev/null || true
 echo -e "${GREEN}✅ Labels created${NC}\n"
 
 # ── Create first milestone ────────────────────────────────
@@ -97,22 +97,22 @@ echo -e "${YELLOW}🎯 Creating milestones...${NC}"
 gh api \
   --method POST \
   /repos/$(gh api user --jq .login)/$REPO_NAME/milestones \
-  -f title="Phase 1: Protocol Research" \
-  -f description="Reverse engineer SYNA30B8 HID protocol, capture and decode reports" \
+  -f title="Phase 0: Grounding" \
+  -f description="Align docs, architecture, and development environment around Synaptics 06CB:00E9" \
   -f state="open" 2>/dev/null || true
 
 gh api \
   --method POST \
   /repos/$(gh api user --jq .login)/$REPO_NAME/milestones \
-  -f title="Phase 2: Userspace Driver" \
-  -f description="Working Rust userspace driver that can capture fingerprint images" \
+  -f title="Phase 1: Instrumentation" \
+  -f description="Descriptor dumps, endpoint mapping, and capture workflow for 06CB:00E9" \
   -f state="open" 2>/dev/null || true
 
 gh api \
   --method POST \
-  /repos/$(gh api user --jq .linux)/$REPO_NAME/milestones \
-  -f title="Phase 3: Kernel Submission" \
-  -f description="Prepare and submit patch series to Linux kernel drivers/input/fingerprint" \
+  /repos/$(gh api user --jq .login)/$REPO_NAME/milestones \
+  -f title="Phase 2: libfprint Path" \
+  -f description="Prototype and integrate support into the Linux fingerprint userspace stack" \
   -f state="open" 2>/dev/null || true
 echo -e "${GREEN}✅ Milestones created${NC}\n"
 
@@ -121,18 +121,17 @@ echo -e "${YELLOW}📝 Creating initial commit...${NC}"
 cp -r /workspace/* . 2>/dev/null || true
 
 git add -A
-git commit -m "feat: initial project scaffold
+git commit -m "feat: initialize Synaptics fingerprint research workspace
 
-linux-synaptics-hid-fingerprint: Rust driver for Synaptics
-HID-over-I2C fingerprint sensors targeting Linux kernel upstream.
+Align the repository around the HP EliteBook x360 1040 G7
+and Synaptics USB fingerprint reader 06CB:00E9.
 
-Hardware confirmed:
-- Synaptics SYNA30B8 (VID:06CB PID:CE1A)
-- HP EliteBook x360 1040 G7
-- Bus: HID over I2C (i2c_hid_acpi)
-- HID report descriptor captured and attached
+Current direction:
+- userspace USB reverse engineering
+- libfprint / fprintd integration path
+- grounding, instrumentation, and protocol research first
 
-Signed-off-by: Munene <your@email.com>"
+Signed-off-by: cm-collins <dev-collins@outlook.com>"
 
 git push origin main
 echo -e "${GREEN}✅ Initial commit pushed${NC}\n"
@@ -146,7 +145,7 @@ echo "╚═══════════════════════�
 echo -e "${NC}"
 echo "  🔗 URL      : $REPO_URL"
 echo "  🌿 Branches : main, develop, feature/syna30b8-initial-probe"
-echo "  🎯 Goal     : Linux kernel drivers/input/fingerprint tree"
+echo "  🎯 Goal     : Linux fingerprint support via userspace and libfprint path"
 echo ""
 echo "  Next:"
 echo "    git checkout feature/syna30b8-initial-probe"

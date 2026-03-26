@@ -1,92 +1,124 @@
-# 🐧 linux-synaptics-hid-fingerprint
+# linux-synaptics-hid-fingerprint
 
-> Open-source Linux kernel driver for **Synaptics HID-over-I2C fingerprint sensors**.  
-> Targeting the upstream Linux kernel `drivers/hid/` tree.
+> Research workspace for bringing Synaptics fingerprint support to Linux,
+> starting with the HP EliteBook x360 1040 G7 fingerprint reader
+> `USB VID:06CB PID:00E9`.
 
-[![CI](https://github.com/munene/linux-synaptics-hid-fingerprint/actions/workflows/ci.yml/badge.svg)](https://github.com/munene/linux-synaptics-hid-fingerprint/actions)
+[![CI](https://github.com/cm-collins/linux-synaptics-hid-fingerprint/actions/workflows/ci.yml/badge.svg)](https://github.com/cm-collins/linux-synaptics-hid-fingerprint/actions/workflows/ci.yml)
 ![Rust](https://img.shields.io/badge/rust-stable-orange)
 ![License](https://img.shields.io/badge/license-GPL--2.0-blue)
-![Status](https://img.shields.io/badge/status-research%20%2F%20WIP-yellow)
-![Target](https://img.shields.io/badge/target-Linux%20kernel%20upstream-green)
+![Status](https://img.shields.io/badge/status-grounding%20%2F%20research-yellow)
+![Target](https://img.shields.io/badge/target-libfprint%20userspace-green)
 
----
+## Goal
 
-## 🎯 Goal
+Build upstream-quality Linux support for an unsupported Synaptics fingerprint
+reader family by starting with one real device and one real laptop:
 
-Get Synaptics HID-over-I2C fingerprint sensors working on Linux — for **every laptop** that uses them, not just one.
+- Laptop: HP EliteBook x360 1040 G7
+- Reader: Synaptics FS7604 Touch Fingerprint Sensor with PurePrint
+- USB ID: `06CB:00E9`
 
-These sensors are currently bound to `hid-multitouch` (wrong driver) and show up as `No devices available` in `fprintd`. This project fixes that.
+The current path is:
 
----
+1. Ground the project around this exact hardware.
+2. Reverse engineer the device in userspace over USB.
+3. Prove enrollment and verification can work on Linux.
+4. Move toward `libfprint` and `fprintd` integration.
+5. Only consider kernel work later if the protocol truly requires it.
 
-## 🖥️ Supported Hardware
+## Current Facts
 
-See [SUPPORTED_DEVICES.md](./SUPPORTED_DEVICES.md) for the full list.
+- The laptop exposes the reader as a vendor-specific USB device, not as a
+  normal `hidraw` fingerprint device.
+- `lsusb` sees `06cb:00e9`.
+- The interface has one bulk OUT endpoint, one bulk IN endpoint, and one small
+  interrupt IN endpoint.
+- `fprintd-enroll` currently reports `No devices available`.
 
-**Confirmed working:**
-- Synaptics SYNA30B8 (`06CB:CE1A`) — HP EliteBook x360 1040 G7
+That makes this a userspace reverse-engineering and `libfprint` project first,
+not a kernel HID/I2C project.
 
-**Likely compatible** (same Vendor ID `06CB`, community testing needed):
-- SYNA3097, SYNA305A, SYNA30AF, SYNA7DB5 and other Synaptics I2C sensors
+## Project Docs
 
-> 💡 **Have a Synaptics fingerprint reader that doesn't work on Linux?**  
-> Run `cat /sys/class/hidraw/hidraw*/device/uevent | grep -i syna` and open an issue!
+- [Architecture](./docs/ARCHITECTURE.md)
+- [Phases](./docs/PHASES.md)
+- [Supported Devices](./docs/SUPPORTED_DEVICES.md)
+- [Upstream Path](./docs/KERNEL_SUBMISSION.md)
 
----
+## Current Focus
 
-## 🗺️ Roadmap
+We are in the grounding phase. That means:
 
-| Phase | Goal | Status |
-|---|---|---|
-| 1 | Identify sensor & capture HID descriptor | ✅ Done |
-| 1 | Set up Rust dev container | ✅ Done |
-| 2 | Decode HID report format | 🔄 In progress |
-| 2 | Capture fingerprint image data | ⏳ Pending |
-| 3 | Userspace Rust driver + libfprint plugin | ⏳ Pending |
-| 4 | **Linux kernel C driver submission** | 🎯 End goal |
+- collecting stable facts about `06CB:00E9`
+- setting up a repeatable development container
+- capturing descriptors, interface details, and baseline USB behavior
+- documenting assumptions before writing protocol-specific code
 
-See [KERNEL_SUBMISSION.md](./KERNEL_SUBMISSION.md) for the full upstream submission checklist.
-
----
-
-## 🚀 Getting Started
+## Development Workflow
 
 ### Prerequisites
-- [VS Code](https://code.visualstudio.com/) + [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- A laptop with a Synaptics HID fingerprint sensor
 
-### Open in Dev Container
+- VS Code with the Dev Containers extension
+- Docker or Docker Engine
+- A machine where the `06CB:00E9` reader is physically attached
+
+### Open In Dev Container
+
 ```bash
-git clone https://github.com/munene/linux-synaptics-hid-fingerprint
+git clone https://github.com/cm-collins/linux-synaptics-hid-fingerprint
 cd linux-synaptics-hid-fingerprint
 code .
-# VS Code: "Reopen in Container" → Yes
 ```
 
-### Run
+Then reopen the workspace in the dev container.
+
+### What The Container Is For
+
+The container is set up for:
+
+- Rust-based USB tooling
+- `libusb` and `libfprint` development
+- USB inspection with `lsusb`, `usb-devices`, and sysfs
+- protocol capture preparation with `usbmon`
+- analysis and documentation work
+
+### First Commands To Run
+
 ```bash
-sudo cargo run -- probe      # Detect sensor
-sudo cargo run -- listen     # Read raw HID reports (place finger on sensor)
-cargo nextest run            # Run tests (no hardware needed)
-cargo watch -x check         # Auto-check on file save
+lsusb -d 06cb:00e9
+usb-devices | sed -n '/Vendor=06cb ProdID=00e9/,+20p'
+fprintd-enroll -f right-index-finger
 ```
 
----
+Expected result today:
 
-## 🤝 Contributing
+- the USB device is visible
+- `fprintd` still says `No devices available`
 
-**You don't need the hardware to contribute!**
+That is the baseline we want to improve.
 
-- Protocol logic & decoding → use `MockSensor` in `src/sensor.rs`
-- Tests → `tests/mock_sensor_test.rs`
-- Docs → always welcome
-- Have hardware? → Run `cargo run -- listen` and share the output in an issue
+## Repository Direction
 
-Please follow [Linux kernel commit message format](./KERNEL_SUBMISSION.md#kernel-patch-format) for all commits — we want the git history clean for upstream submission.
+This repository is intentionally device-first.
 
----
+We are not claiming broad support for all Synaptics readers yet. The immediate
+goal is to make one unsupported reader family understandable and testable, then
+grow support outward from there.
 
-## 📄 License
+## Contributing
 
-GPL-2.0 — same as the Linux kernel.
+Useful contributions right now:
+
+- USB descriptor analysis
+- packet capture review
+- `libfprint` driver research
+- documentation cleanup
+- testing on closely related Synaptics readers
+
+When sharing captures, avoid publishing real fingerprint data unless we have a
+clear redaction and privacy workflow.
+
+## License
+
+GPL-2.0

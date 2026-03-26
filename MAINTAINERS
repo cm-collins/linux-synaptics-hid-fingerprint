@@ -1,11 +1,35 @@
-SYNAPTICS HID FINGERPRINT DRIVER
-M:	Munene <your@email.com>
+SYNAPTICS HID FINGERPRINT PROJECT
+M:	cm-collins <dev-collins@outlook.com>
 S:	Maintained
-F:	drivers/input/fingerprint/synaptics-hid/
-F:	Documentation/devicetree/bindings/input/fingerprint/synaptics,syna30b8.yaml
+F:	MAINTAINERS
+F:	README.md
+F:	docs/
+F:	scripts/
 
-# Supported devices:
-# - Synaptics SYNA30B8  (VID:06CB PID:CE1A) - HP EliteBook x360 1040 G7
-# - Synaptics SYNA3097  (VID:06CB PID:*)    - TBD
-# - Synaptics SYNA305A  (VID:06CB PID:*)    - TBD
-# (add more as confirmed by community contributors)
+# Current development focus:
+# - userspace reverse engineering for Synaptics USB fingerprint reader 06CB:00E9
+# - target laptop: HP EliteBook x360 1040 G7
+# - long-term integration target: libfprint / fprintd
+#
+# Long-term upstream options if the protocol work succeeds:
+# - libfprint driver or backend support
+# - later kernel work only if userspace support proves insufficient
+#
+# Research targets seen in the wild (candidate laptop families; not yet confirmed
+# supported by this repo):
+# - HP EliteBook x360 1040 G7 - Synaptics FS7604 Touch Fingerprint Sensor with
+#   PurePrint (USB VID:06CB PID:00E9)
+# - HP EliteBook 840 G6 - Synaptics Fingerprint Reader [HP G6]
+#   (USB VID:06CB PID:00B7)
+# - HP EliteBook 840 G8 / 845 14-inch / 865 16-inch - Synaptics FS7604 Touch
+#   Fingerprint Sensor with PurePrint (USB VID:06CB PID:00F0)
+# - Lenovo ThinkPad X1 Carbon Gen 6 - Metallica MIS Touch Fingerprint Reader
+#   (USB VID:06CB PID:009A)
+# - Lenovo ThinkPad X1 Extreme - Prometheus MIS Touch Fingerprint Reader
+#   (USB VID:06CB PID:00BD)
+# - Lenovo ThinkPad X1 Carbon Gen 9/11 - Prometheus Fingerprint Reader
+#   (USB VID:06CB PID:00FC)
+#
+# Note: the previously listed SYNA30B8 / SYNA309x / SYNA7DB5-style IDs map to
+# Synaptics touchpads in public hardware probes, not to fingerprint readers.
+# Keep them out of the fingerprint support list unless we verify otherwise.

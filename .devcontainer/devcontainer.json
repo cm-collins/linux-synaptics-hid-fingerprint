@@ -1,133 +1,93 @@
 {
-    "name": "SYNA30B8 Fingerprint Driver",
+    "name": "Synaptics 06CB:00E9 Research",
     "build": {
         "dockerfile": "Dockerfile.dev",
         "context": ".."
     },
     "workspaceFolder": "/workspace",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-    // ─── Hardware passthrough ─────────────────────────────────────────
-    // Pass SYNA30B8 sensor + I2C bus into the container
     "runArgs": [
         "--privileged",
-        "--device=/dev/hidraw0",
-        "--group-add=plugdev",
-        "--group-add=dialout",
         "--network=host"
     ],
-    // ─── Mount host sensor sysfs paths (read-only) ───────────────────
     "mounts": [
         {
-            "source": "/sys/bus/i2c/devices/i2c-SYNA30B8:00",
-            "target": "/sys/bus/i2c/devices/i2c-SYNA30B8:00",
+            "source": "/dev/bus/usb",
+            "target": "/dev/bus/usb",
+            "type": "bind"
+        },
+        {
+            "source": "/sys/bus/usb/devices",
+            "target": "/sys/bus/usb/devices",
             "type": "bind",
             "readonly": true
         },
         {
-            "source": "/sys/class/hidraw",
-            "target": "/sys/class/hidraw",
+            "source": "/run/udev",
+            "target": "/run/udev",
             "type": "bind",
             "readonly": true
         },
-        // Persist cargo registry cache across rebuilds
+        {
+            "source": "/sys/kernel/debug",
+            "target": "/sys/kernel/debug",
+            "type": "bind"
+        },
         {
             "source": "cargo-cache",
             "target": "/usr/local/cargo/registry",
             "type": "volume"
         },
-        // Persist cargo build cache
         {
             "source": "cargo-target",
             "target": "/workspace/target",
             "type": "volume"
         }
     ],
-    // ─── Container user ──────────────────────────────────────────────
     "remoteUser": "devuser",
     "containerUser": "devuser",
-    // ─── Environment variables ────────────────────────────────────────
     "remoteEnv": {
-        "SYNA30B8_VID": "0x06CB",
-        "SYNA30B8_PID": "0xCE1A",
-        "HIDRAW_DEVICE": "/dev/hidraw0",
+        "SYNAPTICS_VID": "0x06CB",
+        "SYNAPTICS_PID": "0x00E9",
+        "SYNAPTICS_LAPTOP": "HP EliteBook x360 1040 G7",
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "debug",
         "CARGO_INCREMENTAL": "1"
     },
-    // ─── VS Code extensions ───────────────────────────────────────────
     "customizations": {
         "vscode": {
             "extensions": [
-                // Rust
                 "rust-lang.rust-analyzer",
                 "vadimcn.vscode-lldb",
                 "serayuzgur.crates",
                 "tamasfe.even-better-toml",
-                "bungcip.better-toml",
-                "dustypomerleau.rust-syntax",
-                "swellaby.vscode-rust-test-adapter",
-                // Git & GitHub
-                "github.vscode-pull-request-github",
-                "github.copilot",
-                "eamodio.gitlens",
-                "mhutchie.git-graph",
-                // Azure
-                "ms-vscode.azure-account",
-                "ms-azuretools.vscode-azureresourcegroups",
-                // Hex / Binary viewing (for HID reports)
                 "ms-vscode.hexeditor",
                 "slevesque.vscode-hexdump",
-                // Code quality
+                "ms-python.python",
+                "ms-vscode.cpptools",
+                "eamodio.gitlens",
+                "github.vscode-pull-request-github",
                 "usernamehw.errorlens",
-                "streetsidesoftware.code-spell-checker",
-                "gruntfuggly.todo-tree",
-                "aaron-bond.better-comments",
-                // Terminal & productivity
-                "ms-vscode.remote-explorer",
-                "christian-kohler.path-intellisense",
-                "formulahendry.code-runner",
-                // Markdown (for docs)
                 "yzhang.markdown-all-in-one",
                 "bierner.markdown-mermaid"
             ],
             "settings": {
-                // Rust Analyzer
                 "rust-analyzer.check.command": "clippy",
-                "rust-analyzer.check.extraArgs": [
-                    "--",
-                    "-D",
-                    "warnings"
-                ],
                 "rust-analyzer.cargo.features": "all",
                 "rust-analyzer.procMacro.enable": true,
-                "rust-analyzer.lens.enable": true,
-                "rust-analyzer.lens.run.enable": true,
-                "rust-analyzer.lens.debug.enable": true,
-                "rust-analyzer.inlayHints.enable": true,
-                "rust-analyzer.inlayHints.parameterHints.enable": true,
-                "rust-analyzer.inlayHints.typeHints.enable": true,
-                // Editor
                 "editor.formatOnSave": true,
-                "editor.defaultFormatter": "rust-lang.rust-analyzer",
                 "editor.rulers": [
                     100
                 ],
                 "editor.tabSize": 4,
                 "editor.insertSpaces": true,
-                // Hex editor for HID report analysis
                 "hexeditor.defaultEndianness": "little",
-                "hexeditor.showDecodedText": true,
-                // Files
                 "files.watcherExclude": {
                     "**/target/**": true
-                },
-                "files.exclude": {
-                    "**/target": false
                 },
                 "search.exclude": {
                     "**/target": true
                 },
-                // Terminal
                 "terminal.integrated.defaultProfile.linux": "bash",
                 "terminal.integrated.env.linux": {
                     "RUST_BACKTRACE": "1",
@@ -136,8 +96,6 @@
             }
         }
     },
-    // ─── Post-create: scaffold project if it doesn't exist ──────────
     "postCreateCommand": "bash scripts/post-create.sh",
-    // ─── Post-start: verify sensor is accessible ────────────────────
     "postStartCommand": "bash scripts/post-start.sh"
 }
