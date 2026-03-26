@@ -55,7 +55,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-venv \
     python3-usb \
     python3-construct \
-    python3-hexdump \
     vim \
     nano \
     less \
