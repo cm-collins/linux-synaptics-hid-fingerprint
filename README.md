@@ -42,9 +42,12 @@ not a kernel HID/I2C project.
 ## Project Docs
 
 - [Architecture](./docs/ARCHITECTURE.md)
+- [Build Readiness](./docs/BUILD_READINESS.md)
 - [Phases](./docs/PHASES.md)
 - [Supported Devices](./docs/SUPPORTED_DEVICES.md)
 - [Upstream Path](./docs/KERNEL_SUBMISSION.md)
+- [Assumptions And Unknowns](./notes/ASSUMPTIONS.md)
+- [Evidence Checklist](./notes/EVIDENCE_CHECKLIST.md)
 
 ## Current Focus
 
@@ -54,6 +57,13 @@ We are in the grounding phase. That means:
 - setting up a repeatable development container
 - capturing descriptors, interface details, and baseline USB behavior
 - documenting assumptions before writing protocol-specific code
+
+The most useful outputs right now are:
+
+- confirmed descriptor and endpoint facts with timestamps
+- a list of hypotheses that still need evidence
+- repeatable capture commands tied to saved artifacts
+- a first Rust instrumentation tool for safe USB inspection
 
 ## Development Workflow
 
