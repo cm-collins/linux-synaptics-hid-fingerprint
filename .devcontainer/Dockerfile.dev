@@ -12,9 +12,9 @@ LABEL description="Dev container for Synaptics USB fingerprint reverse engineeri
 LABEL device="06CB:00E9"
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV CARGO_HOME=/usr/local/cargo
+ENV CARGO_HOME=/home/devuser/.cargo
 ENV RUSTUP_HOME=/usr/local/rustup
-ENV PATH="${CARGO_HOME}/bin:${PATH}"
+ENV PATH="/usr/local/cargo/bin:${CARGO_HOME}/bin:${PATH}"
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
@@ -87,13 +87,15 @@ RUN groupadd -f plugdev \
 RUN echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{idProduct}=="00e9", MODE="0666", GROUP="plugdev", TAG+="uaccess"' \
     > /etc/udev/rules.d/99-synaptics-fingerprint.rules
 
-RUN mkdir -p /workspace /workspace/captures /workspace/notes /workspace/artifacts \
-    && chown -R devuser:devuser /workspace
+RUN mkdir -p /workspace /workspace/captures /workspace/notes /workspace/artifacts /workspace/target \
+    /home/devuser/.cargo/registry /home/devuser/.cargo/git /home/devuser/.cargo/bin \
+    && chown -R devuser:devuser /workspace /home/devuser/.cargo
 
 WORKDIR /workspace
 USER devuser
 
-ENV PATH="/home/devuser/.cargo/bin:${CARGO_HOME}/bin:${PATH}"
+ENV CARGO_TARGET_DIR=/workspace/target
+ENV PATH="/home/devuser/.cargo/bin:/usr/local/cargo/bin:${PATH}"
 
 RUN echo 'export PS1="[syna-00e9] \w $ "' >> /home/devuser/.bashrc \
     && echo 'alias ll="ls -alF --color=auto"' >> /home/devuser/.bashrc \

@@ -1,0 +1,13 @@
+captured_at: 2026-03-26T12:46:22Z
+sysfs_path: /sys/bus/usb/devices/1-7
+idVendor: 06cb
+idProduct: 00e9
+busnum: 1
+devnum: 3
+speed: 12
+version:  2.00
+bConfigurationValue: 1
+bNumInterfaces:  1
+authorized: 1
+removable: fixed
+serial: 40e700397336

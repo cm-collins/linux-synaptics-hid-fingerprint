@@ -7,7 +7,7 @@
 [![CI](https://github.com/cm-collins/linux-synaptics-hid-fingerprint/actions/workflows/ci.yml/badge.svg)](https://github.com/cm-collins/linux-synaptics-hid-fingerprint/actions/workflows/ci.yml)
 ![Rust](https://img.shields.io/badge/rust-stable-orange)
 ![License](https://img.shields.io/badge/license-GPL--2.0-blue)
-![Status](https://img.shields.io/badge/status-grounding%20%2F%20research-yellow)
+![Status](https://img.shields.io/badge/status-phase%201%20complete-green)
 ![Target](https://img.shields.io/badge/target-libfprint%20userspace-green)
 
 ## Goal
@@ -48,30 +48,80 @@ not a kernel HID/I2C project.
 - [Upstream Path](./docs/KERNEL_SUBMISSION.md)
 - [Assumptions And Unknowns](./notes/ASSUMPTIONS.md)
 - [Evidence Checklist](./notes/EVIDENCE_CHECKLIST.md)
+- [Evidence Ledger](./notes/EVIDENCE_LEDGER.md)
+- [Experiment Journal](./notes/EXPERIMENT_JOURNAL.md)
 
 ## Current Focus
 
-We are in the grounding phase. That means:
+Phase 1 instrumentation is now in place. The current focus is moving into early
+Phase 2 protocol mapping while preserving repeatable baseline evidence.
+
+The repository now provides:
 
 - collecting stable facts about `06CB:00E9`
-- setting up a repeatable development container
-- capturing descriptors, interface details, and baseline USB behavior
-- documenting assumptions before writing protocol-specific code
+- a repeatable local probe workflow
+- a checked-in device profile and evidence ledger
+- stable artifact paths for repeated baseline runs
+- a `usbmon` capture workflow with host-side preflight checks
 
-The most useful outputs right now are:
+The most useful next outputs are:
 
-- confirmed descriptor and endpoint facts with timestamps
-- a list of hypotheses that still need evidence
-- repeatable capture commands tied to saved artifacts
-- a first Rust instrumentation tool for safe USB inspection
+- idle and stimulus-driven bus captures
+- command and response hypotheses
+- startup-state observations after successful interface claim
+- evidence that narrows the correct `libfprint` device model
+
+The repo now includes an initial CLI for that work:
+
+```bash
+cargo run -- probe
+```
+
+It can also save a stable report and perform bounded interface probing:
+
+```bash
+cargo run -- probe --output artifacts/probe.txt
+cargo run -- probe --claim 0 --read-ep 0x83 --length 64 --timeout-ms 250
+cargo run -- device-profile --output notes/device-profile.md
+./scripts/compare-baseline-runs.sh artifacts/local-probe artifacts/local-probe-replay
+./scripts/capture-usbmon.sh 5
+```
 
 ## Development Workflow
 
 ### Prerequisites
 
+- A Linux machine where the `06CB:00E9` reader is physically attached
+- Rust toolchain
+- `libusb-1.0` development files
+
+Optional:
+
 - VS Code with the Dev Containers extension
 - Docker or Docker Engine
-- A machine where the `06CB:00E9` reader is physically attached
+
+### Run On A Local Linux Machine
+
+Install the Rust and USB prerequisites for your distro, then run:
+
+```bash
+./scripts/run-local-probe.sh
+```
+
+That helper captures a baseline `lsusb` view, saves a filtered `usb-devices`
+snapshot when available, captures sysfs metadata, runs the Rust probe, and refreshes
+`notes/device-profile.md`.
+
+You can still run the commands manually if you prefer:
+
+```bash
+cargo run -- probe
+cargo run -- device-profile --output notes/device-profile.md
+./scripts/capture-usbmon.sh 5
+```
+
+If the reader is attached locally, `probe` should enumerate `06cb:00e9`
+directly through `libusb`.
 
 ### Open In Dev Container
 
@@ -83,6 +133,10 @@ code .
 
 Then reopen the workspace in the dev container.
 
+If you change the dev container Cargo paths or volume mounts, rebuild the
+container so the writable cache and target directories are recreated for
+`devuser`.
+
 ### What The Container Is For
 
 The container is set up for:
@@ -93,20 +147,33 @@ The container is set up for:
 - protocol capture preparation with `usbmon`
 - analysis and documentation work
 
+The CLI also works inside the container, but successful live USB probing still
+depends on the host exposing the fingerprint reader to the container.
+`usbmon` capture also depends on the host exposing debugfs and the `usbmon`
+interfaces.
+
 ### First Commands To Run
 
 ```bash
 lsusb -d 06cb:00e9
 usb-devices | sed -n '/Vendor=06cb ProdID=00e9/,+20p'
 fprintd-enroll -f right-index-finger
+cargo run -- probe
+cargo run -- device-profile
+./scripts/capture-usbmon.sh 5
 ```
 
-Expected result today:
+Expected result on a local Linux host with the reader attached:
 
 - the USB device is visible
 - `fprintd` still says `No devices available`
 
-That is the baseline we want to improve.
+Expected result in a dev container without USB passthrough:
+
+- the tool explains that `libusb` cannot currently see `06cb:00e9`
+- the diagnostic output lists the USB devices the container can see
+
+That is the Phase 1 baseline the repository now preserves.
 
 ## Repository Direction
 

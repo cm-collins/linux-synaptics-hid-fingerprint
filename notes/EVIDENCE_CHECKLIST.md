@@ -3,6 +3,11 @@
 This checklist defines the minimum evidence the project should gather before
 deeper protocol or driver claims are treated as grounded.
 
+Current status and dated references live in:
+
+- `notes/EVIDENCE_LEDGER.md`
+- `notes/EXPERIMENT_JOURNAL.md`
+
 ## Device Identity
 
 - `lsusb -d 06cb:00e9` output saved

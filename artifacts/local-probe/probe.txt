@@ -1,0 +1,17 @@
+found 1 matching device(s) for 06cb:00e9
+
+device #1
+  location: bus 001 address 003
+  vendor/product: 06cb:00e9
+  class/subclass/protocol: ff/10/ff
+  usb version: 2.0.0
+  max packet size (ep0): 8
+  configurations: 1
+
+  config 1: interfaces=1 self_powered=false remote_wakeup=true max_power=100mA
+    interface 0:
+      alt 0 class/subclass/protocol ff/00/00
+      endpoints: 3
+        ep 0x01 OUT bulk max_packet=64 interval=0
+        ep 0x81 IN bulk max_packet=64 interval=0
+        ep 0x83 IN interrupt max_packet=8 interval=4

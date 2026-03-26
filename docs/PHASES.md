@@ -27,6 +27,14 @@ Exit criteria:
 Purpose:
 Create the tooling needed to inspect the device safely and reproducibly.
 
+Status note:
+
+- As of 2026-03-26, the repository contains the Phase 1 instrumentation
+  deliverables and the supporting evidence workflow.
+- See `notes/EVIDENCE_LEDGER.md`, `notes/EXPERIMENT_JOURNAL.md`,
+  `scripts/run-local-probe.sh`, `scripts/capture-usbmon.sh`, and
+  `scripts/compare-baseline-runs.sh`.
+
 Deliverables:
 
 - USB descriptor dump tooling

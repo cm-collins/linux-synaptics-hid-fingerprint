@@ -11,6 +11,8 @@ target
 
 # Cargo and rustup local overrides
 .cargo/
+.cargo-local/
+.target-local/
 
 # Environment files
 .env

@@ -30,7 +30,12 @@
         },
         {
             "source": "cargo-cache",
-            "target": "/usr/local/cargo/registry",
+            "target": "/home/devuser/.cargo/registry",
+            "type": "volume"
+        },
+        {
+            "source": "cargo-git",
+            "target": "/home/devuser/.cargo/git",
             "type": "volume"
         },
         {
@@ -47,7 +52,9 @@
         "SYNAPTICS_LAPTOP": "HP EliteBook x360 1040 G7",
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "debug",
-        "CARGO_INCREMENTAL": "1"
+        "CARGO_INCREMENTAL": "1",
+        "CARGO_HOME": "/home/devuser/.cargo",
+        "CARGO_TARGET_DIR": "/workspace/target"
     },
     "customizations": {
         "vscode": {
