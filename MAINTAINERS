@@ -1,0 +1,11 @@
+SYNAPTICS HID FINGERPRINT DRIVER
+M:	Munene <your@email.com>
+S:	Maintained
+F:	drivers/input/fingerprint/synaptics-hid/
+F:	Documentation/devicetree/bindings/input/fingerprint/synaptics,syna30b8.yaml
+
+# Supported devices:
+# - Synaptics SYNA30B8  (VID:06CB PID:CE1A) - HP EliteBook x360 1040 G7
+# - Synaptics SYNA3097  (VID:06CB PID:*)    - TBD
+# - Synaptics SYNA305A  (VID:06CB PID:*)    - TBD
+# (add more as confirmed by community contributors)
