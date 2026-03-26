@@ -14,6 +14,12 @@ cargo --version
 python3 --version
 echo ""
 
+echo "Optional extras"
+echo "- run: bash scripts/install-cargo-devtools.sh"
+echo "- installs cargo-watch, cargo-expand, cargo-audit, cargo-edit, cargo-outdated, cargo-nextest"
+echo "- cargo tree is already built into Cargo"
+echo ""
+
 echo "Libraries"
 pkg-config --modversion libusb-1.0 || true
 pkg-config --modversion libfprint-2 || true

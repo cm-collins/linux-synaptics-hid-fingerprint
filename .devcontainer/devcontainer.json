@@ -6,6 +6,7 @@
     },
     "workspaceFolder": "/workspace",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "updateRemoteUserUID": false,
     "runArgs": [
         "--privileged",
         "--network=host"
@@ -19,12 +20,6 @@
         {
             "source": "/sys/bus/usb/devices",
             "target": "/sys/bus/usb/devices",
-            "type": "bind",
-            "readonly": true
-        },
-        {
-            "source": "/run/udev",
-            "target": "/run/udev",
             "type": "bind",
             "readonly": true
         },

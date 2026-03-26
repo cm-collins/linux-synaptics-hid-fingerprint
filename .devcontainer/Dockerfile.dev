@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+#
 # ============================================================
 # Synaptics Fingerprint Reverse Engineering Dev Container
 # Focus device: Synaptics 06CB:00E9 on HP EliteBook x360 1040 G7
@@ -66,18 +68,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xxd \
     && rm -rf /var/lib/apt/lists/*
 
-RUN rustup update stable \
-    && rustup default stable \
-    && rustup component add clippy rustfmt rust-src rust-analyzer llvm-tools-preview
-
-RUN cargo install \
-    cargo-watch \
-    cargo-edit \
-    cargo-expand \
-    cargo-audit \
-    cargo-outdated \
-    cargo-nextest \
-    cargo-tree
+RUN rustup component add clippy rustfmt rust-src rust-analyzer llvm-tools-preview
 
 RUN pip3 install --no-cache-dir --break-system-packages \
     pyusb \
