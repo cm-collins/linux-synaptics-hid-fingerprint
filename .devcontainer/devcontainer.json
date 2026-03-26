@@ -1,0 +1,101 @@
+{
+    "name": "Synaptics 06CB:00E9 Research",
+    "build": {
+        "dockerfile": "Dockerfile.dev",
+        "context": ".."
+    },
+    "workspaceFolder": "/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "runArgs": [
+        "--privileged",
+        "--network=host"
+    ],
+    "mounts": [
+        {
+            "source": "/dev/bus/usb",
+            "target": "/dev/bus/usb",
+            "type": "bind"
+        },
+        {
+            "source": "/sys/bus/usb/devices",
+            "target": "/sys/bus/usb/devices",
+            "type": "bind",
+            "readonly": true
+        },
+        {
+            "source": "/run/udev",
+            "target": "/run/udev",
+            "type": "bind",
+            "readonly": true
+        },
+        {
+            "source": "/sys/kernel/debug",
+            "target": "/sys/kernel/debug",
+            "type": "bind"
+        },
+        {
+            "source": "cargo-cache",
+            "target": "/usr/local/cargo/registry",
+            "type": "volume"
+        },
+        {
+            "source": "cargo-target",
+            "target": "/workspace/target",
+            "type": "volume"
+        }
+    ],
+    "remoteUser": "devuser",
+    "containerUser": "devuser",
+    "remoteEnv": {
+        "SYNAPTICS_VID": "0x06CB",
+        "SYNAPTICS_PID": "0x00E9",
+        "SYNAPTICS_LAPTOP": "HP EliteBook x360 1040 G7",
+        "RUST_BACKTRACE": "1",
+        "RUST_LOG": "debug",
+        "CARGO_INCREMENTAL": "1"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust-analyzer",
+                "vadimcn.vscode-lldb",
+                "serayuzgur.crates",
+                "tamasfe.even-better-toml",
+                "ms-vscode.hexeditor",
+                "slevesque.vscode-hexdump",
+                "ms-python.python",
+                "ms-vscode.cpptools",
+                "eamodio.gitlens",
+                "github.vscode-pull-request-github",
+                "usernamehw.errorlens",
+                "yzhang.markdown-all-in-one",
+                "bierner.markdown-mermaid"
+            ],
+            "settings": {
+                "rust-analyzer.check.command": "clippy",
+                "rust-analyzer.cargo.features": "all",
+                "rust-analyzer.procMacro.enable": true,
+                "editor.formatOnSave": true,
+                "editor.rulers": [
+                    100
+                ],
+                "editor.tabSize": 4,
+                "editor.insertSpaces": true,
+                "hexeditor.defaultEndianness": "little",
+                "files.watcherExclude": {
+                    "**/target/**": true
+                },
+                "search.exclude": {
+                    "**/target": true
+                },
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.env.linux": {
+                    "RUST_BACKTRACE": "1",
+                    "RUST_LOG": "debug"
+                }
+            }
+        }
+    },
+    "postCreateCommand": "bash scripts/post-create.sh",
+    "postStartCommand": "bash scripts/post-start.sh"
+}

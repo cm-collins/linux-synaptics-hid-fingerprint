@@ -1,0 +1,114 @@
+# ============================================================
+# Synaptics Fingerprint Reverse Engineering Dev Container
+# Focus device: Synaptics 06CB:00E9 on HP EliteBook x360 1040 G7
+# ============================================================
+
+FROM rust:latest
+
+LABEL maintainer="cm-collins <dev-collins@outlook.com>"
+LABEL description="Dev container for Synaptics USB fingerprint reverse engineering"
+LABEL device="06CB:00E9"
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CARGO_HOME=/usr/local/cargo
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV PATH="${CARGO_HOME}/bin:${PATH}"
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    meson \
+    ninja-build \
+    pkg-config \
+    clang \
+    llvm \
+    llvm-dev \
+    libclang-dev \
+    git \
+    git-lfs \
+    curl \
+    wget \
+    unzip \
+    jq \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    sudo \
+    udev \
+    dbus \
+    libudev-dev \
+    libusb-1.0-0-dev \
+    libglib2.0-dev \
+    libgusb-dev \
+    libnss3-dev \
+    libfprint-2-dev \
+    usbutils \
+    strace \
+    ltrace \
+    gdb \
+    gdbserver \
+    linux-perf \
+    python3 \
+    python3-pip \
+    python3-venv \
+    python3-usb \
+    python3-construct \
+    python3-hexdump \
+    vim \
+    nano \
+    less \
+    htop \
+    tree \
+    ripgrep \
+    fd-find \
+    bat \
+    xxd \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN rustup update stable \
+    && rustup default stable \
+    && rustup component add clippy rustfmt rust-src rust-analyzer llvm-tools-preview
+
+RUN cargo install \
+    cargo-watch \
+    cargo-edit \
+    cargo-expand \
+    cargo-audit \
+    cargo-outdated \
+    cargo-nextest \
+    cargo-tree
+
+RUN pip3 install --no-cache-dir --break-system-packages \
+    pyusb \
+    construct \
+    hexdump \
+    ipython
+
+RUN groupadd -f plugdev \
+    && groupadd --gid 1000 devuser \
+    && useradd --uid 1000 --gid 1000 -m devuser \
+    && usermod -aG plugdev,dialout devuser \
+    && mkdir -p /etc/sudoers.d \
+    && echo "devuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/devuser \
+    && chmod 0440 /etc/sudoers.d/devuser
+
+RUN echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{idProduct}=="00e9", MODE="0666", GROUP="plugdev", TAG+="uaccess"' \
+    > /etc/udev/rules.d/99-synaptics-fingerprint.rules
+
+RUN mkdir -p /workspace /workspace/captures /workspace/notes /workspace/artifacts \
+    && chown -R devuser:devuser /workspace
+
+WORKDIR /workspace
+USER devuser
+
+ENV PATH="/home/devuser/.cargo/bin:${CARGO_HOME}/bin:${PATH}"
+
+RUN echo 'export PS1="[syna-00e9] \w $ "' >> /home/devuser/.bashrc \
+    && echo 'alias ll="ls -alF --color=auto"' >> /home/devuser/.bashrc \
+    && echo 'alias syna-usb="lsusb -d 06cb:00e9"' >> /home/devuser/.bashrc \
+    && echo 'alias syna-dev="usb-devices | sed -n '\''/Vendor=06cb ProdID=00e9/,+20p'\''"' >> /home/devuser/.bashrc \
+    && echo 'alias syna-fprint="fprintd-enroll -f right-index-finger"' >> /home/devuser/.bashrc
+
+CMD ["/bin/bash"]
