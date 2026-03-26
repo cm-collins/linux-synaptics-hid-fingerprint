@@ -59,6 +59,7 @@ The next implementation target should focus on protocol mapping support:
 - capture stimulus-driven traffic safely
 - document startup behavior after successful interface claim
 - begin classifying command and response families
+- use a repeatable Phase 2 session workflow for each experiment run
 
 ## Decision Gates Before Deeper Driver Work
 

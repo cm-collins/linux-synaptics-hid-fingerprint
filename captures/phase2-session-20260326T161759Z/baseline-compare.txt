@@ -1,0 +1,16 @@
+== lsusb.txt ==
+no differences
+
+== usb-devices.txt ==
+no differences
+
+== sysfs-device.txt ==
+no differences
+
+== sysfs-interface.txt ==
+no differences
+
+== probe.txt ==
+no differences
+
+Baseline runs are comparable.

@@ -7,6 +7,7 @@ PID="${SYNAPTICS_PID:-00e9}"
 DURATION_SECONDS="${1:-5}"
 DEFAULT_OUTPUT_DIR="${ROOT_DIR}/captures/usbmon-$(date -u +%Y%m%dT%H%M%SZ)"
 OUTPUT_DIR="${2:-${DEFAULT_OUTPUT_DIR}}"
+USE_SUDO="${SYNAPTICS_USBMON_USE_SUDO:-0}"
 
 normalize_hex() {
     printf '%s' "${1#0x}" | tr '[:upper:]' '[:lower:]'
@@ -44,17 +45,20 @@ USBMON_PATH="/sys/kernel/debug/usb/usbmon/${BUSNUM}u"
 
 mkdir -p "${OUTPUT_DIR}"
 
-if [ ! -e "${USBMON_PATH}" ]; then
-    echo "usbmon is not visible at ${USBMON_PATH}." >&2
+if [ ! -d /sys/kernel/debug ]; then
+    echo "debugfs is not mounted at /sys/kernel/debug." >&2
     echo "Enable it on the host first, then retry:" >&2
-    echo "  sudo modprobe usbmon" >&2
     echo "  sudo mount -t debugfs none /sys/kernel/debug" >&2
     exit 1
 fi
 
-if [ ! -r "${USBMON_PATH}" ]; then
-    echo "usbmon exists but is not readable at ${USBMON_PATH}." >&2
-    echo "Retry the capture with host permissions if needed." >&2
+if [ ! -e "${USBMON_PATH}" ] && [ "${USE_SUDO}" != "1" ]; then
+    echo "usbmon is not visible at ${USBMON_PATH}." >&2
+    echo "Enable it on the host first, then retry:" >&2
+    echo "  sudo modprobe usbmon" >&2
+    echo "  sudo mount -t debugfs none /sys/kernel/debug" >&2
+    echo "If usbmon is already enabled but debugfs is root-only, retry with:" >&2
+    echo "  SYNAPTICS_USBMON_USE_SUDO=1 ./scripts/capture-usbmon.sh ${DURATION_SECONDS}" >&2
     exit 1
 fi
 
@@ -73,7 +77,19 @@ RAW_CAPTURE_PATH="${OUTPUT_DIR}/usbmon-bus${BUSNUM}.txt"
 
 echo "Capturing ${DURATION_SECONDS}s of usbmon traffic from bus ${BUSNUM}..."
 capture_status=0
-timeout "${DURATION_SECONDS}" cat "${USBMON_PATH}" > "${RAW_CAPTURE_PATH}" || capture_status=$?
+
+if [ "${USE_SUDO}" = "1" ]; then
+    timeout "${DURATION_SECONDS}" sudo cat "${USBMON_PATH}" > "${RAW_CAPTURE_PATH}" || capture_status=$?
+else
+    if [ ! -r "${USBMON_PATH}" ]; then
+        echo "usbmon exists but is not readable at ${USBMON_PATH}." >&2
+        echo "Retry the capture with host permissions if needed:" >&2
+        echo "  SYNAPTICS_USBMON_USE_SUDO=1 ./scripts/capture-usbmon.sh ${DURATION_SECONDS}" >&2
+        exit 1
+    fi
+
+    timeout "${DURATION_SECONDS}" cat "${USBMON_PATH}" > "${RAW_CAPTURE_PATH}" || capture_status=$?
+fi
 
 if [ "${capture_status}" -ne 0 ] && [ "${capture_status}" -ne 124 ]; then
     echo "usbmon capture failed with status ${capture_status}." >&2

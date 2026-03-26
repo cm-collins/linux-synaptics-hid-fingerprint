@@ -50,6 +50,8 @@ not a kernel HID/I2C project.
 - [Evidence Checklist](./notes/EVIDENCE_CHECKLIST.md)
 - [Evidence Ledger](./notes/EVIDENCE_LEDGER.md)
 - [Experiment Journal](./notes/EXPERIMENT_JOURNAL.md)
+- [Protocol Mapping Notes](./notes/PROTOCOL_MAPPING.md)
+- [Phase 2 Capture Checklist](./notes/PHASE2_CAPTURE_CHECKLIST.md)
 
 ## Current Focus
 
@@ -85,6 +87,7 @@ cargo run -- probe --claim 0 --read-ep 0x83 --length 64 --timeout-ms 250
 cargo run -- device-profile --output notes/device-profile.md
 ./scripts/compare-baseline-runs.sh artifacts/local-probe artifacts/local-probe-replay
 ./scripts/capture-usbmon.sh 5
+./scripts/run-phase2-session.sh
 ```
 
 ## Development Workflow
@@ -118,6 +121,7 @@ You can still run the commands manually if you prefer:
 cargo run -- probe
 cargo run -- device-profile --output notes/device-profile.md
 ./scripts/capture-usbmon.sh 5
+./scripts/run-phase2-session.sh
 ```
 
 If the reader is attached locally, `probe` should enumerate `06cb:00e9`
@@ -161,6 +165,7 @@ fprintd-enroll -f right-index-finger
 cargo run -- probe
 cargo run -- device-profile
 ./scripts/capture-usbmon.sh 5
+./scripts/run-phase2-session.sh
 ```
 
 Expected result on a local Linux host with the reader attached:

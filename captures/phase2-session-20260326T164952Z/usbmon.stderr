@@ -1,0 +1,4 @@
+usbmon is not visible at /sys/kernel/debug/usb/usbmon/1u.
+Enable it on the host first, then retry:
+  sudo modprobe usbmon
+  sudo mount -t debugfs none /sys/kernel/debug

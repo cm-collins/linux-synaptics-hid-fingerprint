@@ -53,6 +53,14 @@ CAPTURED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
             printf '\n'
         fi
     done
+
+    for file in power/control power/runtime_status power/runtime_enabled power/autosuspend power/autosuspend_delay_ms power/wakeup; do
+        if [ -f "${DEVICE_PATH}/${file}" ]; then
+            printf '%s: ' "${file}"
+            tr -d '\n' < "${DEVICE_PATH}/${file}"
+            printf '\n'
+        fi
+    done
 } > "${OUTPUT_DIR}/sysfs-device.txt"
 
 {
@@ -60,6 +68,14 @@ CAPTURED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     echo "interface_path: ${INTERFACE_PATH}"
 
     for file in bInterfaceClass bInterfaceSubClass bInterfaceProtocol supports_autosuspend; do
+        if [ -f "${INTERFACE_PATH}/${file}" ]; then
+            printf '%s: ' "${file}"
+            tr -d '\n' < "${INTERFACE_PATH}/${file}"
+            printf '\n'
+        fi
+    done
+
+    for file in power/control power/runtime_status power/runtime_enabled power/autosuspend power/autosuspend_delay_ms power/wakeup; do
         if [ -f "${INTERFACE_PATH}/${file}" ]; then
             printf '%s: ' "${file}"
             tr -d '\n' < "${INTERFACE_PATH}/${file}"

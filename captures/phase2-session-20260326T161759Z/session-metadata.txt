@@ -1,0 +1,7 @@
+session_id: 20260326T161759Z
+captured_at: 2026-03-26T16:17:59Z
+device_id: 06cb:00e9
+host: munene-HP-EliteBook-x360-1040-G7-Notebook-PC
+kernel: Linux 6.17.0-19-generic x86_64 GNU/Linux
+baseline_dir: /home/munene/dev/software-prototyping/syna30b8-fingerprint/captures/phase2-session-20260326T161759Z/baseline
+usbmon_duration_seconds: 5

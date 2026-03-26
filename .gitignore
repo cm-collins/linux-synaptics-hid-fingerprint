@@ -13,6 +13,7 @@ target
 .cargo/
 .cargo-local/
 .target-local/
+captures/
 
 # Environment files
 .env

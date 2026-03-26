@@ -7,6 +7,9 @@ This directory stores sanitized traffic captures and metadata for the
 
 - `usbmon-<timestamp>/metadata.txt`
 - `usbmon-<timestamp>/usbmon-bus<bus>.txt`
+- `phase2-session-<timestamp>/session-metadata.txt`
+- `phase2-session-<timestamp>/baseline/`
+- `phase2-session-<timestamp>/summary.txt`
 
 The raw text capture is bus-scoped. Use the metadata file to correlate the
 capture with the target bus number, device number, and sysfs path observed
@@ -22,6 +25,11 @@ during the same run.
 4. Run `./scripts/capture-usbmon.sh 5`
 5. Review and sanitize the resulting text capture before sharing or committing
    it.
+
+For a fuller Phase 2 run that refreshes baseline artifacts and records
+preflight results even when runtime access or usbmon are not available yet, run:
+
+`./scripts/run-phase2-session.sh`
 
 ## Privacy
 

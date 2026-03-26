@@ -1,0 +1,3 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running `target/debug/syna-tool probe --claim 0 --read-ep 0x83 --length 64 --timeout-ms 250 --output /home/munene/dev/software-prototyping/syna30b8-fingerprint/captures/phase2-session-20260326T164952Z/runtime-probe.txt`
+error: failed to open device for runtime probe: Access denied (insufficient permissions)

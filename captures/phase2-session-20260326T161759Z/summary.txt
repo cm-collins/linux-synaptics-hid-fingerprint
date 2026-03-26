@@ -1,0 +1,12 @@
+session_id: 20260326T161759Z
+runtime_probe_status: 1
+usbmon_status: 1
+baseline_log: /home/munene/dev/software-prototyping/syna30b8-fingerprint/captures/phase2-session-20260326T161759Z/baseline.log
+runtime_probe_stdout: /home/munene/dev/software-prototyping/syna30b8-fingerprint/captures/phase2-session-20260326T161759Z/runtime-probe.stdout
+runtime_probe_stderr: /home/munene/dev/software-prototyping/syna30b8-fingerprint/captures/phase2-session-20260326T161759Z/runtime-probe.stderr
+usbmon_stdout: /home/munene/dev/software-prototyping/syna30b8-fingerprint/captures/phase2-session-20260326T161759Z/usbmon.stdout
+usbmon_stderr: /home/munene/dev/software-prototyping/syna30b8-fingerprint/captures/phase2-session-20260326T161759Z/usbmon.stderr
+
+Interpretation:
+- runtime probe did not complete successfully; inspect runtime-probe.stderr
+- usbmon capture did not complete successfully; inspect usbmon.stderr
